@@ -124,6 +124,13 @@
   }
   .search-box input:focus-visible{ outline:3px solid var(--pink); outline-offset:2px; }
 
+  .hint{
+    margin:10px 2px 0;
+    font-size:.76rem;
+    color:var(--ink-muted);
+  }
+  .hint strong{ color:var(--pink-deep); }
+
   .chips{ display:flex; flex-wrap:wrap; gap:8px; }
   .chip{
     font-family:'Zen Maru Gothic', sans-serif;
@@ -238,14 +245,15 @@
 <main>
   <section class="search-panel">
     <div class="search-box">
-      <label for="search" class="sr-only">キャラクター名で検索</label>
+      <label for="search" class="sr-only">キャラクターを探す</label>
       <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="7"></circle>
         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
       </svg>
-      <input type="text" id="search" placeholder="キャラクター名で検索（例: ナマエ）" autocomplete="off">
+      <input type="text" id="search" placeholder="キャラクター名を検索して下から選択" autocomplete="off">
     </div>
     <div class="chips" id="chips" aria-label="キャラクターで絞り込み"></div>
+    <p class="hint" id="hint"></p>
   </section>
 
   <p class="result-count" id="result-count"></p>
@@ -264,10 +272,13 @@
 (function(){
   let allEpisodes = [];
   let allCharacters = [];
+  let selected = new Set();
+  let chipQuery = '';
 
   const els = {
     search: document.getElementById('search'),
     chips: document.getElementById('chips'),
+    hint: document.getElementById('hint'),
     grid: document.getElementById('grid'),
     resultCount: document.getElementById('result-count'),
     totalCount: document.getElementById('total-count'),
@@ -318,49 +329,75 @@
     allCharacters = Array.from(charSet).sort(function(a,b){ return a.localeCompare(b, 'ja'); });
 
     renderChips();
-    applyFilter('');
+    updateResults();
 
-    els.search.addEventListener('input', function(e){ applyFilter(e.target.value); });
+    els.search.addEventListener('input', function(e){
+      chipQuery = e.target.value;
+      renderChips();
+    });
+  }
+
+  function toggleCharacter(name){
+    if(name === ''){
+      selected.clear();
+    } else if(selected.has(name)){
+      selected.delete(name);
+    } else {
+      selected.add(name);
+    }
+    renderChips();
+    updateResults();
   }
 
   function renderChips(){
-    let html = '<button class="chip active" data-name="">すべて表示</button>';
-    html += allCharacters.map(function(name){
-      return '<button class="chip" data-name="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
+    const q = chipQuery.trim();
+
+    const visible = allCharacters.filter(function(name){
+      return selected.has(name) || !q || name.includes(q);
+    });
+    visible.sort(function(a, b){
+      const aSel = selected.has(a) ? 0 : 1;
+      const bSel = selected.has(b) ? 0 : 1;
+      if(aSel !== bSel) return aSel - bSel;
+      return a.localeCompare(b, 'ja');
+    });
+
+    let html = '<button class="chip' + (selected.size === 0 ? ' active' : '') + '" data-name="">すべて表示</button>';
+    html += visible.map(function(name){
+      const active = selected.has(name) ? ' active' : '';
+      return '<button class="chip' + active + '" data-name="' + escapeHtml(name) + '">' + escapeHtml(name) + '</button>';
     }).join('');
     els.chips.innerHTML = html;
 
     els.chips.querySelectorAll('.chip').forEach(function(btn){
-      btn.addEventListener('click', function(){
-        const name = btn.dataset.name;
-        els.search.value = name;
-        applyFilter(name);
-      });
+      btn.addEventListener('click', function(){ toggleCharacter(btn.dataset.name); });
     });
+
+    els.hint.innerHTML = selected.size > 1
+      ? '<strong>' + selected.size + '人</strong>選択中：すべて登場する回だけを表示しています（AND検索）'
+      : '複数タップで絞り込み（選択した全キャラが登場する回だけを表示）';
   }
 
-  function applyFilter(query){
-    const q = query.trim();
-    const filtered = q
-      ? allEpisodes.filter(function(ep){
-          return (ep.characters || []).some(function(c){ return c.includes(q); });
-        })
-      : allEpisodes;
+  function updateResults(){
+    const names = Array.from(selected);
+    const filtered = names.length === 0
+      ? allEpisodes
+      : allEpisodes.filter(function(ep){
+          const chars = ep.characters || [];
+          return names.every(function(n){ return chars.includes(n); });
+        });
 
     renderGrid(filtered);
 
-    els.resultCount.innerHTML = q
-      ? '<strong>' + filtered.length + '</strong> / ' + allEpisodes.length + ' 話が「' + escapeHtml(q) + '」に該当'
-      : '全 <strong>' + allEpisodes.length + '</strong> 話を表示中';
-
-    els.chips.querySelectorAll('.chip').forEach(function(btn){
-      btn.classList.toggle('active', btn.dataset.name === q);
-    });
+    els.resultCount.innerHTML = names.length === 0
+      ? '全 <strong>' + allEpisodes.length + '</strong> 話を表示中'
+      : '<strong>' + filtered.length + '</strong> / ' + allEpisodes.length + ' 話が「' +
+        names.map(escapeHtml).join('」「') + '」' + (names.length > 1 ? '全員' : '') + 'に該当';
   }
 
   function renderGrid(episodes){
     if(episodes.length === 0){
-      els.grid.innerHTML = '<div class="empty-state"><span class="big">見つかりませんでした</span>別のキャラクター名で試してみてください。</div>';
+      els.grid.innerHTML = '<div class="empty-state"><span class="big">見つかりませんでした</span>組み合わせを変えて試してみてください。</div>';
       return;
     }
     els.grid.innerHTML = episodes.map(function(ep){
