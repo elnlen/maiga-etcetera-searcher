@@ -469,31 +469,31 @@
   },
   {
     "number": 41,
-    "characters": [],
+    "characters": ["ナマエ","ヨダカ","まどか先輩","いろは","灯火","ねむ","アリナ"],
     "thumbnail": "https://madoka-exedra.com/comic/assets/img/thumb_41.jpg",
     "link": "https://madoka-exedra.com/comic/?page=41"
   },
   {
     "number": 42,
-    "characters": [],
+    "characters": ["ナマエ","まどか先輩","いろは","まさら","クシュ","アリナ","ほむら","さやか","きょうこ","やちよ","つるの","フェリシア","さな"],
     "thumbnail": "https://madoka-exedra.com/comic/assets/img/thumb_42.jpg",
     "link": "https://madoka-exedra.com/comic/?page=42"
   },
   {
     "number": 43,
-    "characters": [],
+    "characters": ["A-Q","ナマエ","まどか先輩","いろは","まばゆ","織莉子","キリカ","ゆま","ももこ","アシュリー・テイラー","みたま"],
     "thumbnail": "https://madoka-exedra.com/comic/assets/img/thumb_43.jpg",
     "link": "https://madoka-exedra.com/comic/?page=43"
   },
   {
     "number": 44,
-    "characters": [],
+    "characters": ["ナマエ","まどか先輩","いろは","水着マミ","マミ","なぎさ"],
     "thumbnail": "https://madoka-exedra.com/comic/assets/img/thumb_44.jpg",
     "link": "https://madoka-exedra.com/comic/?page=44"
   },
   {
     "number": 45,
-    "characters": [],
+    "characters": ["A-Q","ナマエ","まどか先輩","いろは","梨花","れん"],
     "thumbnail": "https://madoka-exedra.com/comic/assets/img/thumb_45.jpg",
     "link": "https://madoka-exedra.com/comic/?page=45"
   },
@@ -764,9 +764,9 @@
   {
     "number": 90,
     "characters": [
-      "常盤 ななか",
-      "夏目 かこ",
-      "純 美雨"
+      "ななか",
+      "かこ",
+      "美雨"
     ],
     "thumbnail": "https://madoka-exedra.com/comic/assets/img/thumb_90.jpg",
     "link": "https://madoka-exedra.com/comic/?page=90"
